@@ -88,10 +88,6 @@ endif(USE_LIBFMT)
 # Find dependencies
 find_package(ZLIB REQUIRED)
 
-# Define the RMG-Core library - MOVED HERE TO FIX ORDER OF OPERATIONS
-add_library(RMG-Core SHARED ${RMG_CORE_SOURCES})
-
-# Set target properties
 target_include_directories(RMG-Core PRIVATE 
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -127,7 +123,8 @@ if(WIN32)
     )
 endif(WIN32)
 
-# Link libraries - after target is defined
+add_library(RMG-Core SHARED ${RMG_CORE_SOURCES})
+
 if(UNIX)
     target_link_libraries(RMG-Core dl)
 endif(UNIX)

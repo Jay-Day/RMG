@@ -43,6 +43,7 @@ pkg_check_modules(SDL2 REQUIRED sdl2)
 set(RMG_SOURCES
     UserInterface/MainWindow.cpp
     UserInterface/MainWindow.ui
+    UserInterface/RollbackOverlay.cpp
     UserInterface/Widget/RomBrowser/RomBrowserWidget.cpp
     UserInterface/Widget/RomBrowser/RomBrowserListViewWidget.cpp
     UserInterface/Widget/RomBrowser/RomBrowserGridViewWidget.cpp
@@ -129,6 +130,7 @@ add_dependencies(RMG
 
 target_link_libraries(RMG 
     RMG-Core
+    ${SDL2_LIBRARIES}
 )
 
 # needed for dynamically linked RMG-Core
@@ -159,4 +161,26 @@ endif(UPDATER)
 if (NETPLAY)
     target_link_libraries(RMG Qt6::WebSockets)
 endif(NETPLAY)
+
+# Copy the GGPO DLL to the executable directory on Windows
+if(WIN32)
+    # Get the output directory of the main executable
+    get_target_property(RMG_OUTPUT_DIR RMG RUNTIME_OUTPUT_DIRECTORY)
+    if(NOT RMG_OUTPUT_DIR)
+        # If not set, use the default CMAKE_RUNTIME_OUTPUT_DIRECTORY or the current binary dir
+        if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+            set(RMG_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+        else()
+            set(RMG_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+        endif()
+    endif()
+
+    # Add a post-build command to copy the GGPO DLL
+    add_custom_command(TARGET RMG POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:GGPO>
+        ${RMG_OUTPUT_DIR}
+        COMMENT "Copying GGPO DLL to executable directory"
+    )
+endif(WIN32)
 

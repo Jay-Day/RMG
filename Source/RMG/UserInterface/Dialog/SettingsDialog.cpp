@@ -107,6 +107,9 @@ SettingsDialog::SettingsDialog(QWidget *parent, QString file) : QDialog(parent)
         this->tabWidget->setTabEnabled(3, false);
     }
 
+    // Setup all frames
+    this->setupRollbackFrame();
+
     pluginList = CoreGetAllPlugins();
 
     for (int i = 0; i < (int)SettingsDialogTab::Invalid; i++)
@@ -1604,4 +1607,92 @@ void SettingsDialog::on_changeNTSCPifRomButton_clicked(void)
 void SettingsDialog::on_changePALPifRomButton_clicked(void)
 {
     this->chooseFile(this->palPifRomLineEdit, tr("Open PAL PIF ROM"), "PIF ROMs (*.rom)", "d4232dc935cad0650ac2664d52281f3a");
+}
+
+// Add a new tab or section for Rollback settings
+void SettingsDialog::setupRollbackFrame(void)
+{
+    // Create a new tab for rollback settings
+    QWidget* rollbackTab = new QWidget(this->innerInterfaceTabWidget);
+    this->innerInterfaceTabWidget->addTab(rollbackTab, tr("Rollback"));
+    
+    // Create the rollback frame
+    QFrame* rollbackFrame = new QFrame(rollbackTab);
+    QVBoxLayout* tabLayout = new QVBoxLayout(rollbackTab);
+    tabLayout->addWidget(rollbackFrame);
+    
+    QVBoxLayout* mainLayout = new QVBoxLayout(rollbackFrame);
+    
+    // Rollback visualization settings
+    QGroupBox* visualGroupBox = new QGroupBox(tr("Visualization"));
+    QVBoxLayout* visualLayout = new QVBoxLayout(visualGroupBox);
+    
+    // Checkboxes for visualization options
+    QCheckBox* showRollbackMetricsCheckBox = new QCheckBox(tr("Show rollback metrics overlay (toggle with F6)"));
+    showRollbackMetricsCheckBox->setChecked(CoreSettingsGetBoolValue(SettingsID::Netplay_ShowRollbackMetrics));
+    connect(showRollbackMetricsCheckBox, &QCheckBox::toggled, this, [](bool checked) {
+        CoreSettingsSetValue(SettingsID::Netplay_ShowRollbackMetrics, checked);
+    });
+    
+    QCheckBox* showRollbackFlashCheckBox = new QCheckBox(tr("Show visual flash effect during rollbacks"));
+    showRollbackFlashCheckBox->setChecked(CoreSettingsGetBoolValue(SettingsID::Netplay_ShowRollbackFlash));
+    connect(showRollbackFlashCheckBox, &QCheckBox::toggled, this, [](bool checked) {
+        CoreSettingsSetValue(SettingsID::Netplay_ShowRollbackFlash, checked);
+    });
+    
+    visualLayout->addWidget(showRollbackMetricsCheckBox);
+    visualLayout->addWidget(showRollbackFlashCheckBox);
+    
+    // Rollback performance settings
+    QGroupBox* performanceGroupBox = new QGroupBox(tr("Performance"));
+    QVBoxLayout* performanceLayout = new QVBoxLayout(performanceGroupBox);
+    
+    // Frame delay slider
+    QLabel* frameDelayLabel = new QLabel(tr("Input delay (frames):"));
+    QSlider* frameDelaySlider = new QSlider(Qt::Horizontal);
+    frameDelaySlider->setMinimum(1);
+    frameDelaySlider->setMaximum(8);
+    frameDelaySlider->setValue(CoreSettingsGetIntValue(SettingsID::Netplay_RollbackFrameDelay));
+    
+    QLabel* frameDelayValueLabel = new QLabel(QString::number(frameDelaySlider->value()));
+    
+    connect(frameDelaySlider, &QSlider::valueChanged, this, [frameDelayValueLabel](int value) {
+        frameDelayValueLabel->setText(QString::number(value));
+        CoreSettingsSetValue(SettingsID::Netplay_RollbackFrameDelay, value);
+    });
+    
+    QHBoxLayout* frameDelayLayout = new QHBoxLayout();
+    frameDelayLayout->addWidget(frameDelayLabel);
+    frameDelayLayout->addWidget(frameDelaySlider);
+    frameDelayLayout->addWidget(frameDelayValueLabel);
+    
+    performanceLayout->addLayout(frameDelayLayout);
+    
+    // Add info label explaining the settings
+    QLabel* infoLabel = new QLabel(tr(
+        "Increase input delay to reduce the frequency of rollbacks at the cost of more perceived input lag.\n"
+        "Higher values are better for unstable connections, lower values feel more responsive but may cause more rollbacks."
+    ));
+    infoLabel->setWordWrap(true);
+    performanceLayout->addWidget(infoLabel);
+    
+    // Add everything to the main layout
+    mainLayout->addWidget(visualGroupBox);
+    mainLayout->addWidget(performanceGroupBox);
+    mainLayout->addStretch();
+}
+
+// Update the init method to include the rollback tab
+void SettingsDialog::init(void)
+{
+    // ... existing init code ...
+    
+    // Call the setup methods for each tab
+    this->setupGeneralFrame();
+    this->setupEmulationFrame();
+    this->setupPluginsFrame();
+    this->setupRomBrowserFrame();
+    this->setupRollbackFrame();
+    
+    // ... rest of existing init code ...
 }

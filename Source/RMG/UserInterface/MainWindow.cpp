@@ -8,6 +8,9 @@
  *  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "MainWindow.hpp"
+#include "ui_MainWindow.h"
+#include <RMG-Core/Version.hpp>
+#include <RMG-Core/Netplay.hpp>
 
 #include "UserInterface/Dialog/AboutDialog.hpp"
 #include "Dialog/Cheats/CheatsDialog.hpp"
@@ -76,6 +79,18 @@ using namespace Utilities;
 
 MainWindow::MainWindow() : QMainWindow(nullptr)
 {
+    setupUi(this);
+
+    // Initialize the rollback overlay but don't show it yet
+    m_rollbackOverlay = new RollbackOverlay(this);
+    m_rollbackOverlay->setVisible(false);
+
+    // Set window title + icon
+    this->ui_WindowTitle = tr("Rosalie's Mupen GUI v") + QString::fromStdString(CoreGetVersion());
+    this->setWindowTitle(this->ui_WindowTitle);
+    this->setWindowIcon(QIcon(":/RMG/Resources/Icons/AppIcon.png"));
+
+    // ... existing code ...
 }
 
 MainWindow::~MainWindow()
@@ -1355,6 +1370,16 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
         this->killTimer(this->ui_LoadSaveStateSlotTimerId);
     }
+    
+    // Handle rollback flash timer
+    if (event->timerId() == m_rollbackFlashTimerId) {
+        if (m_rollbackFlashOverlay) {
+            m_rollbackFlashOverlay->hide();
+        }
+        killTimer(m_rollbackFlashTimerId);
+        m_rollbackFlashTimerId = 0;
+        return;
+    }
 }
 
 void MainWindow::on_EventFilter_KeyPressed(QKeyEvent *event)
@@ -1369,6 +1394,17 @@ void MainWindow::on_EventFilter_KeyPressed(QKeyEvent *event)
     int mod = Utilities::QtModKeyToSdl2ModKey(event->modifiers());
 
     CoreSetKeyDown(key, mod);
+
+    // Add F6 as a shortcut to toggle rollback overlay when in rollback netplay
+    if (event->key() == Qt::Key_F6 && CoreHasInitRollbackNetplay()) {
+        // Toggle the setting value
+        bool showMetrics = !CoreSettingsGetBoolValue(SettingsID::Netplay_ShowRollbackMetrics);
+        CoreSettingsSetValue(SettingsID::Netplay_ShowRollbackMetrics, showMetrics);
+        
+        // Update the overlay visibility
+        toggleRollbackOverlay(showMetrics);
+        return;
+    }
 }
 
 void MainWindow::on_EventFilter_KeyReleased(QKeyEvent *event)
@@ -2753,4 +2789,15 @@ void MainWindow::on_VidExt_Quit(void)
     }
 
     this->ui_VidExtRenderMode = VidExtRenderMode::Invalid;
+}
+
+void MainWindow::toggleRollbackOverlay(bool visible)
+{
+    // Create the rollback overlay if it doesn't exist
+    if (!m_rollbackOverlay) {
+        m_rollbackOverlay = new RollbackOverlay(this);
+    }
+    
+    // Show or hide the overlay
+    m_rollbackOverlay->setVisible(visible);
 }

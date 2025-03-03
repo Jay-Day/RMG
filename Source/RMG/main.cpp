@@ -17,6 +17,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <SDL.h>
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <Dbghelp.h>
@@ -178,6 +180,9 @@ int main(int argc, char **argv)
     // the generic wayland icon on wayland
     QGuiApplication::setDesktopFileName("com.github.Rosalie241.RMG");
 #endif
+
+    // Initialize SDL for the application
+    SDL_SetMainReady();
 
     QApplication app(argc, argv);
 

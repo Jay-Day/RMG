@@ -73,6 +73,7 @@ class SettingsDialog : public QDialog, private Ui::SettingsDialog
     void restoreDefaults(int);
     void loadSettings(int);
     void saveSettings(int);
+    void init(void);
 
     void loadCoreSettings(void);
     void loadGameSettings(void);
@@ -131,6 +132,12 @@ class SettingsDialog : public QDialog, private Ui::SettingsDialog
     void chooseColor(QPushButton *, QColor *, bool skipChoice = false);
 
     bool applyPluginSettings(void);
+
+    void setupGeneralFrame(void);
+    void setupEmulationFrame(void);
+    void setupPluginsFrame(void);
+    void setupRomBrowserFrame(void);
+    void setupRollbackFrame(void);
 
   protected:
     void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;

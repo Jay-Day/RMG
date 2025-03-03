@@ -18,6 +18,7 @@
 #include "Widget/Render/DummyWidget.hpp"
 #include "Widget/Render/OGLWidget.hpp"
 #include "Widget/Render/VKWidget.hpp"
+#include "RollbackOverlay.h"
 
 #ifdef NETPLAY
 #include "Dialog/Netplay/NetplaySessionDialog.hpp"
@@ -117,6 +118,14 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
     QString ui_WindowTitle;
 
     Dialog::LogDialog logDialog;
+    
+    // Add the rollback overlay widget
+    RollbackOverlay* m_rollbackOverlay;
+
+    // Rollback visualization
+    QWidget* m_rollbackFlashOverlay = nullptr;
+    int m_rollbackFlashTimerId = 0;
+
 #ifdef NETPLAY
     Dialog::NetplaySessionDialog* netplaySessionDialog = nullptr;
 #endif // NETPLAY
@@ -131,6 +140,9 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
     void showErrorMessage(QString text, QString details = "", bool force = true);
 
     void updateUI(bool inEmulation, bool isPaused);
+
+    void toggleRollbackOverlay(bool visible);
+    void showRollbackFlash();
 
     void storeGeometry(void);
     void loadGeometry(void);

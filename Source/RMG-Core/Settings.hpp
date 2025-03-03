@@ -46,6 +46,10 @@ enum class SettingsID
     Netplay_Nickname,
     Netplay_ServerJsonUrl,
     Netplay_SelectedServer,
+    Netplay_ServerName,
+    Netplay_RollbackFrameDelay,
+    Netplay_ShowRollbackMetrics,
+    Netplay_ShowRollbackFlash,
 
     // Core Plugin Settings
     Core_GFX_Plugin,
@@ -89,6 +93,7 @@ enum class SettingsID
     Core_CountPerOpDenomPot,
     Core_SiDmaDuration,
     Core_SaveFileNameFormat,
+    Core_UseRollbackNetplay,
 
     // (mupen64plus) Overlay Core Settings
     CoreOverlay_RandomizeInterrupt,
@@ -480,6 +485,10 @@ bool CoreSettingsDeleteSection(std::string section);
 
 // returns whether a key in the given section exists
 bool CoreSettingsKeyExists(std::string section, std::string key);
+
+// Convenience wrapper functions for setting values
+bool CoreSettingsSetIntValue(SettingsID settingId, int value);
+bool CoreSettingsSetBoolValue(SettingsID settingId, bool value);
 
 // sets setting as int value
 bool CoreSettingsSetValue(SettingsID settingId, int value);

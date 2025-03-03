@@ -170,7 +170,19 @@ static l_Setting get_setting(SettingsID settingId)
         setting = {SETTING_SECTION_NETPLAY, "ServerJsonUrl", std::string("https://m64p.s3.amazonaws.com/servers.json")};
         break;
     case SettingsID::Netplay_SelectedServer:
-        setting = {SETTING_SECTION_NETPLAY, "SelectedServer", std::string("")};
+        setting = {SETTING_SECTION_NETPLAY, "SelectedServer", 0, "Selected Netplay Server"};
+        break;
+    case SettingsID::Netplay_ServerName:
+        setting = {SETTING_SECTION_NETPLAY, "ServerName", "Default Server", "Netplay Server Name"};
+        break;
+    case SettingsID::Netplay_RollbackFrameDelay:
+        setting = {SETTING_SECTION_NETPLAY, "RollbackFrameDelay", 2, "Input delay in frames for rollback netplay"};
+        break;
+    case SettingsID::Netplay_ShowRollbackMetrics:
+        setting = {SETTING_SECTION_NETPLAY, "ShowRollbackMetrics", true, "Show rollback metrics overlay"};
+        break;
+    case SettingsID::Netplay_ShowRollbackFlash:
+        setting = {SETTING_SECTION_NETPLAY, "ShowRollbackFlash", true, "Show visual effect during rollbacks"};
         break;
 
     case SettingsID::Core_GFX_Plugin:
@@ -247,6 +259,9 @@ static l_Setting get_setting(SettingsID settingId)
         break;
     case SettingsID::Core_SaveFileNameFormat:
         setting = {SETTING_SECTION_M64P, "SaveFilenameFormat", 1};
+        break;
+    case SettingsID::Core_UseRollbackNetplay:
+        setting = {SETTING_SECTION_M64P, "UseRollbackNetplay", false, "Enable rollback netcode instead of traditional netplay"};
         break;
 
     case SettingsID::CoreOverlay_RandomizeInterrupt:
@@ -2178,4 +2193,16 @@ CORE_EXPORT std::vector<std::string> CoreSettingsGetStringListValue(std::string 
     }
 
     return value;
+}
+
+// Convenience wrapper for setting int values
+CORE_EXPORT bool CoreSettingsSetIntValue(SettingsID settingId, int value)
+{
+    return CoreSettingsSetValue(settingId, value);
+}
+
+// Convenience wrapper for setting bool values
+CORE_EXPORT bool CoreSettingsSetBoolValue(SettingsID settingId, bool value)
+{
+    return CoreSettingsSetValue(settingId, value);
 }
